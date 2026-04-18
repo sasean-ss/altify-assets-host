@@ -12,32 +12,41 @@
 <style>
   :root {
     /* ── Altify brand ──────────────────────────── */
-    --altify-navy: #0C1C2C;
-    --altify-blue: #29A6FF;
-    --altify-blue-dark: #1E88E5;
-    --altify-blue-soft: rgba(41, 166, 255, 0.1);
-    --altify-slate: #5A6489;
-    --altify-mist: #9CA3BF;
+    --altify-navy: #0C1C2C;          /* App base — deepest layer */
+    --altify-surface: #1D2742;       /* Cards, elevated surfaces */
+    --altify-surface-high: #2A3556;  /* Hover / active state */
+    --altify-indigo: #676DFF;        /* Primary action colour (app CTA) */
+    --altify-indigo-hover: #8086FF;  /* Hover */
+    --altify-indigo-soft: rgba(103, 109, 255, 0.14);
+    --altify-blue: #29A6FF;          /* Web brand blue — kept for logo */
 
     /* ── Applied ───────────────────────────────── */
-    --bg: #F7F9FC;
-    --surface: #FFFFFF;
-    --border: #E4E8F0;
-    --border-strong: #CDD4E0;
-    --text: var(--altify-navy);
-    --text-muted: var(--altify-slate);
-    --text-faint: var(--altify-mist);
-    --accent: var(--altify-blue);
-    --accent-dark: var(--altify-blue-dark);
-    --accent-soft: var(--altify-blue-soft);
-    --success: #10B981;
-    --danger: #EF4444;
-    --warning: #F59E0B;
-    --shadow-sm: 0 1px 2px rgba(12, 28, 44, 0.04);
-    --shadow-md: 0 4px 16px rgba(12, 28, 44, 0.08);
-    --shadow-lg: 0 20px 60px rgba(12, 28, 44, 0.22);
-    --checker: repeating-conic-gradient(#EDF1F7 0% 25%, #F7F9FC 0% 50%) 50% / 20px 20px;
+    --bg: var(--altify-navy);
+    --surface: var(--altify-surface);
+    --surface-high: var(--altify-surface-high);
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --text: #F1F4FA;
+    --text-muted: #9299B3;
+    --text-faint: #5C6684;
+    --accent: var(--altify-indigo);
+    --accent-dark: var(--altify-indigo-hover);
+    --accent-soft: var(--altify-indigo-soft);
+    --success: #4ADE80;
+    --danger: #F87171;
+    --warning: #F4C661;
+
+    /* Dark theme shadows — softer, more spread */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+
+    /* Darker checker for transparent-image previews */
+    --checker: repeating-conic-gradient(#28334F 0% 25%, #1B2540 0% 50%) 50% / 20px 20px;
   }
+
+  /* Placeholder styling for dark theme */
+  input::placeholder { color: var(--text-faint); }
 
   * { box-sizing: border-box; }
   html, body {
@@ -234,17 +243,18 @@
     width: 56px;
     height: 56px;
     border-radius: 14px;
-    background: var(--altify-navy);
+    background: var(--altify-indigo);
     margin: 0 auto 16px;
     display: grid;
     place-items: center;
     color: white;
     transition: transform 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 12px rgba(12, 28, 44, 0.15);
+    box-shadow: 0 0 0 0 rgba(103, 109, 255, 0), 0 8px 24px rgba(103, 109, 255, 0.35);
   }
 
   .dropzone:hover .dropzone-icon,
   .dropzone.active .dropzone-icon {
+    box-shadow: 0 0 0 6px rgba(103, 109, 255, 0.12), 0 8px 24px rgba(103, 109, 255, 0.45);
     transform: translateY(-2px) scale(1.05);
   }
 
@@ -282,7 +292,7 @@
   .drag-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(41, 166, 255, 0.15);
+    background: rgba(103, 109, 255, 0.15);
     backdrop-filter: blur(8px);
     display: none;
     align-items: center;
@@ -347,9 +357,9 @@
   }
 
   .queue-item.uploading .queue-status { color: var(--accent); }
-  .queue-item.success { border-color: var(--success); background: rgba(16, 185, 129, 0.04); }
+  .queue-item.success { border-color: var(--success); background: rgba(74, 222, 128, 0.08); }
   .queue-item.success .queue-status { color: var(--success); }
-  .queue-item.error { border-color: var(--danger); background: rgba(239, 68, 68, 0.04); }
+  .queue-item.error { border-color: var(--danger); background: rgba(248, 113, 113, 0.08); }
   .queue-item.error .queue-status { color: var(--danger); }
 
   .queue-spinner {
@@ -672,8 +682,9 @@
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%) translateY(20px);
-    background: var(--text);
-    color: white;
+    background: var(--surface-high);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
     padding: 10px 20px;
     border-radius: 8px;
     font-size: 13px;
@@ -685,10 +696,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    box-shadow: var(--shadow-lg);
   }
 
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.error { background: var(--danger); }
+  .toast.error { background: var(--danger); color: white; border-color: var(--danger); }
 
   /* ── Footer ─────────────────────────────────────────── */
   footer {
