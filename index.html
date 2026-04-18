@@ -1,0 +1,1229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Altify · Asset Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --border: #EBEBE6;
+    --border-strong: #D6D6CF;
+    --text: #0E1116;
+    --text-muted: #6B7280;
+    --text-faint: #9CA3AF;
+    --accent: #29A6FF;
+    --accent-dark: #1E88E5;
+    --accent-soft: rgba(41, 166, 255, 0.1);
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --shadow-sm: 0 1px 2px rgba(14, 17, 22, 0.04);
+    --shadow-md: 0 4px 16px rgba(14, 17, 22, 0.06);
+    --shadow-lg: 0 20px 60px rgba(14, 17, 22, 0.18);
+    --checker: repeating-conic-gradient(#f0f0ec 0% 25%, #fafaf7 0% 50%) 50% / 20px 20px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  /* ── Lock screen ────────────────────────────────────── */
+  .lock-screen {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    z-index: 100;
+    padding: 24px;
+  }
+
+  .lock-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: var(--shadow-md);
+  }
+
+  .lock-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .lock-brand-text { line-height: 1.15; }
+  .lock-brand-text .name { font-weight: 700; font-size: 15px; }
+  .lock-brand-text .sub { font-size: 12px; color: var(--text-muted); }
+
+  .lock-card h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+
+  .lock-card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  input[type="password"],
+  input[type="text"] {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--bg);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+
+  input[type="password"]:focus,
+  input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    background: var(--surface);
+  }
+
+  .error-msg {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 12px;
+    min-height: 18px;
+  }
+
+  /* ── Main app ─────────────────────────────────────── */
+  .app { display: none; }
+  .app.ready { display: block; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .topbar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-text { line-height: 1.15; }
+  .brand-text .name { font-weight: 700; font-size: 15px; }
+  .brand-text .sub { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .topbar-right strong { color: var(--text); font-weight: 600; }
+
+  .logout-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* ── Drop zone ─────────────────────────────────────── */
+  .dropzone {
+    border: 2px dashed var(--border-strong);
+    border-radius: 16px;
+    padding: 48px 32px;
+    text-align: center;
+    background: var(--surface);
+    transition: all 0.2s;
+    cursor: pointer;
+    margin-bottom: 32px;
+  }
+
+  .dropzone:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .dropzone.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: scale(1.005);
+  }
+
+  .dropzone-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    margin: 0 auto 16px;
+    display: grid;
+    place-items: center;
+    color: white;
+    transition: transform 0.3s;
+  }
+
+  .dropzone:hover .dropzone-icon,
+  .dropzone.active .dropzone-icon {
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  .dropzone h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .dropzone p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .dropzone .types {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+    justify-content: center;
+  }
+
+  .type-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .drag-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(41, 166, 255, 0.15);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    pointer-events: none;
+    border: 4px dashed var(--accent);
+  }
+
+  .drag-overlay.show { display: flex; }
+
+  .drag-overlay-text {
+    background: var(--surface);
+    padding: 28px 40px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+
+  .drag-overlay-text h3 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .drag-overlay-text p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+  /* ── Upload queue ─────────────────────────────────── */
+  .queue {
+    margin-bottom: 32px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .queue.show { display: flex; }
+
+  .queue-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .queue-name {
+    flex: 1;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .queue-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .queue-item.uploading .queue-status { color: var(--accent); }
+  .queue-item.success { border-color: var(--success); background: rgba(16, 185, 129, 0.04); }
+  .queue-item.success .queue-status { color: var(--success); }
+  .queue-item.error { border-color: var(--danger); background: rgba(239, 68, 68, 0.04); }
+  .queue-item.error .queue-status { color: var(--danger); }
+
+  .queue-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--accent-soft);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Gallery ─────────────────────────────────────── */
+  .gallery-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .gallery-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .search {
+    position: relative;
+    min-width: 240px;
+    flex: 0 1 320px;
+  }
+
+  .search input {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    font-size: 13px;
+  }
+
+  .search svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .preview {
+    aspect-ratio: 16 / 10;
+    background: var(--checker);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    padding: 16px;
+  }
+
+  .dim-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(14, 17, 22, 0.78);
+    backdrop-filter: blur(4px);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover .dim-badge { opacity: 1; }
+
+  .card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .filename {
+    font-weight: 600;
+    font-size: 14px;
+    word-break: break-all;
+    line-height: 1.3;
+  }
+
+  .meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .url-row {
+    display: flex;
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .url-box {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .url-box:hover {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .btn {
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    text-decoration: none;
+    min-height: 30px;
+  }
+
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .btn.primary:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+    color: white;
+  }
+
+  .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  .card-actions {
+    display: flex;
+    gap: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-actions .btn { flex: 1; justify-content: center; padding: 8px 10px; }
+
+  /* ── Empty & loading ─────────────────────────────────── */
+  .empty {
+    text-align: center;
+    padding: 60px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+
+  .empty h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .empty p { color: var(--text-muted); margin: 0; font-size: 13px; }
+
+  .loading { padding: 40px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+  /* ── Modal ─────────────────────────────────────────── */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(14, 17, 22, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 70;
+    padding: 24px;
+  }
+  .modal-backdrop.show { display: flex; }
+
+  .modal-wrapper { position: relative; max-width: 560px; width: 100%; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 28px;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .modal h2 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    word-break: break-all;
+  }
+
+  .modal .subtitle { color: var(--text-muted); font-size: 13px; margin: 0 0 20px; }
+
+  .modal-row { margin-bottom: 18px; }
+
+  .modal label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .modal textarea,
+  .modal input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--bg);
+    resize: vertical;
+  }
+
+  .modal textarea { min-height: 90px; }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+  }
+
+  .modal-close:hover { background: var(--bg); color: var(--text); }
+
+  /* ── Confirm dialog ────────────────────────────────── */
+  .confirm { max-width: 400px; }
+  .confirm h2 { font-size: 16px; }
+  .confirm p { color: var(--text); margin: 0 0 20px; font-size: 14px; }
+  .confirm strong { font-family: 'JetBrains Mono', monospace; font-size: 13px; word-break: break-all; }
+
+  /* ── Toast ─────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--danger); }
+
+  /* ── Footer ─────────────────────────────────────────── */
+  footer {
+    max-width: 1280px;
+    margin: 48px auto 0;
+    padding: 24px 32px 40px;
+    color: var(--text-faint);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    main { padding: 24px 20px 60px; }
+    .topbar-inner { padding: 14px 20px; }
+    .grid { grid-template-columns: 1fr; }
+    .dropzone { padding: 32px 20px; }
+    .lock-card { padding: 28px; }
+    footer { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Lock screen ───────────────────────────────────── -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-brand">
+      <div class="brand-mark">A</div>
+      <div class="lock-brand-text">
+        <div class="name">Altify Assets</div>
+        <div class="sub">Private upload area</div>
+      </div>
+    </div>
+    <h1>Enter password</h1>
+    <p>Authenticate to upload files. Public URLs stay accessible without auth — this gate is just for you.</p>
+    <div class="input-row">
+      <input type="password" id="password-input" placeholder="Upload password" autocomplete="current-password" />
+      <button class="btn primary" id="unlock-btn" style="padding: 0 18px">Unlock</button>
+    </div>
+    <div class="error-msg" id="auth-error"></div>
+  </div>
+</div>
+
+<!-- ── Main app ──────────────────────────────────────── -->
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div class="brand-text">
+          <div class="name">Altify Assets</div>
+          <div class="sub">Drag, drop, copy the URL</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div><strong id="count">—</strong> files</div>
+        <div><strong id="total-size">—</strong></div>
+        <button class="logout-btn" id="logout-btn" title="Sign out">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <h2>Drop images here or click to upload</h2>
+      <p>Up to 6 MB per file · Multiple files OK</p>
+      <div class="types">
+        <span class="type-chip">.png</span>
+        <span class="type-chip">.jpg</span>
+        <span class="type-chip">.gif</span>
+        <span class="type-chip">.webp</span>
+        <span class="type-chip">.svg</span>
+        <span class="type-chip">.avif</span>
+      </div>
+      <input type="file" id="file-input" multiple accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/avif,image/x-icon" style="display:none" />
+    </div>
+
+    <div class="queue" id="queue"></div>
+
+    <div class="gallery-header">
+      <h2>Your files</h2>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="search" placeholder="Filter by filename…" autocomplete="off" />
+      </div>
+    </div>
+
+    <div id="content"><div class="loading">Loading files…</div></div>
+  </main>
+
+  <footer>
+    <div>Stored in Netlify Blobs · Served with CORS &amp; 1-year cache</div>
+    <div id="base-url" class="mono">—</div>
+  </footer>
+</div>
+
+<!-- ── Drag overlay ──────────────────────────────────── -->
+<div class="drag-overlay" id="drag-overlay">
+  <div class="drag-overlay-text">
+    <h3>Drop to upload</h3>
+    <p>Release anywhere on the page</p>
+  </div>
+</div>
+
+<!-- ── Embed modal ───────────────────────────────────── -->
+<div class="modal-backdrop" id="embed-modal">
+  <div class="modal-wrapper">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('embed-modal')" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 id="embed-title">Embed snippet</h2>
+      <p class="subtitle">Ready to paste into an email signature or HTML document.</p>
+
+      <div class="modal-row">
+        <label>Direct URL</label>
+        <input type="text" id="embed-url" readonly onclick="this.select()" />
+      </div>
+
+      <div class="modal-row">
+        <label>HTML &lt;img&gt; tag</label>
+        <textarea id="embed-html" readonly onclick="this.select()"></textarea>
+      </div>
+
+      <div class="modal-row">
+        <label>Markdown</label>
+        <input type="text" id="embed-md" readonly onclick="this.select()" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('embed-modal')">Close</button>
+        <button class="btn primary" onclick="copyText(document.getElementById('embed-html').value, 'HTML snippet copied')">Copy HTML</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm delete modal ──────────────────────────── -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal-wrapper" style="max-width: 420px">
+    <div class="modal confirm">
+      <h2>Delete file?</h2>
+      <p>This will permanently remove <strong id="confirm-filename"></strong> and break any email signatures using its URL. Cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('confirm-modal')">Cancel</button>
+        <button class="btn primary" id="confirm-delete-btn" style="background: var(--danger); border-color: var(--danger)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────── -->
+<div class="toast" id="toast">
+  <svg id="toast-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+  <span id="toast-text">Copied</span>
+</div>
+
+<script>
+(() => {
+  const BASE_URL = window.location.origin;
+  document.getElementById('base-url').textContent = BASE_URL;
+
+  // ── State ────────────────────────────────────────────
+  let token = sessionStorage.getItem('altifyAssetsToken') || '';
+  let allFiles = [];
+  let filterText = '';
+  let fileToDelete = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  // ── Auth ────────────────────────────────────────────
+  async function attemptUnlock(password) {
+    $('auth-error').textContent = '';
+    try {
+      const res = await fetch('/api/list', {
+        headers: { Authorization: `Bearer ${password}` },
+      });
+      if (res.status === 401) {
+        $('auth-error').textContent = 'Incorrect password.';
+        return false;
+      }
+      if (res.status === 500) {
+        const data = await res.json().catch(() => ({}));
+        $('auth-error').textContent = data.error || 'Server error.';
+        return false;
+      }
+      if (!res.ok) {
+        $('auth-error').textContent = `Error: ${res.status}`;
+        return false;
+      }
+      const data = await res.json();
+      token = password;
+      sessionStorage.setItem('altifyAssetsToken', token);
+      showApp(data.files || []);
+      return true;
+    } catch (err) {
+      $('auth-error').textContent = err.message || 'Connection error.';
+      return false;
+    }
+  }
+
+  $('unlock-btn').addEventListener('click', () => {
+    const pw = $('password-input').value.trim();
+    if (!pw) return;
+    attemptUnlock(pw);
+  });
+
+  $('password-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('unlock-btn').click();
+  });
+
+  $('logout-btn').addEventListener('click', () => {
+    sessionStorage.removeItem('altifyAssetsToken');
+    location.reload();
+  });
+
+  function showApp(files) {
+    $('lock-screen').style.display = 'none';
+    $('app').classList.add('ready');
+    allFiles = files;
+    renderGallery();
+  }
+
+  // Auto-unlock if we already have a token
+  if (token) {
+    attemptUnlock(token).then((ok) => {
+      if (!ok) { token = ''; sessionStorage.removeItem('altifyAssetsToken'); }
+    });
+  } else {
+    $('password-input').focus();
+  }
+
+  // ── Gallery rendering ────────────────────────────────
+  function renderGallery() {
+    const visible = filterText
+      ? allFiles.filter((f) => f.filename.toLowerCase().includes(filterText))
+      : allFiles;
+
+    $('count').textContent = allFiles.length;
+    const total = allFiles.reduce((s, f) => s + (f.size || 0), 0);
+    $('total-size').textContent = formatBytes(total);
+
+    const content = $('content');
+    if (!allFiles.length) {
+      content.innerHTML = `<div class="empty"><h3>No files yet</h3><p>Drop some images above to get started.</p></div>`;
+      return;
+    }
+    if (!visible.length) {
+      content.innerHTML = `<div class="empty"><h3>No matches</h3><p>Try a different search term.</p></div>`;
+      return;
+    }
+
+    content.innerHTML = `<div class="grid">${visible.map(cardHtml).join('')}</div>`;
+
+    content.querySelectorAll('img[data-filename]').forEach((img) => {
+      img.addEventListener('load', () => {
+        const badge = img.closest('.preview').querySelector('.dim-badge');
+        if (badge) badge.textContent = `${img.naturalWidth} × ${img.naturalHeight}`;
+      });
+      img.addEventListener('error', () => {
+        const p = img.closest('.preview');
+        if (p) p.innerHTML = `<div style="color:var(--text-faint);font-size:12px" class="mono">preview unavailable</div>`;
+      });
+    });
+  }
+
+  function cardHtml(file) {
+    const fullUrl = `${BASE_URL}${file.url}`;
+    const safeUrl = escapeHtml(fullUrl);
+    const safeName = escapeHtml(file.filename);
+    const ext = (file.contentType || '').split('/')[1] || '';
+    return `
+      <div class="card" data-filename="${escapeAttr(file.filename)}">
+        <div class="preview">
+          <span class="dim-badge">—</span>
+          <img src="${safeUrl}" alt="${safeName}" data-filename="${safeName}" loading="lazy" />
+        </div>
+        <div class="card-body">
+          <div class="filename">${safeName}</div>
+          <div class="meta">
+            <span>${formatBytes(file.size || 0)}</span>
+            <span>${escapeHtml(ext)}</span>
+          </div>
+          <div class="url-row">
+            <div class="url-box" title="Click to copy" onclick="copyText('${escapeAttr(fullUrl)}', 'URL copied')">${safeUrl}</div>
+            <button class="btn" onclick="copyText('${escapeAttr(fullUrl)}', 'URL copied')" title="Copy URL">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="card-actions">
+            <button class="btn" onclick="openEmbed('${escapeAttr(file.filename)}', '${escapeAttr(fullUrl)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              Embed
+            </button>
+            <a class="btn" href="${safeUrl}" target="_blank" rel="noopener">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Open
+            </a>
+            <button class="btn danger" onclick="confirmDelete('${escapeAttr(file.filename)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Search ────────────────────────────────────────────
+  $('search').addEventListener('input', (e) => {
+    filterText = e.target.value.trim().toLowerCase();
+    renderGallery();
+  });
+
+  // ── Upload flow ──────────────────────────────────────
+  const dropzone = $('dropzone');
+  const fileInput = $('file-input');
+  const queue = $('queue');
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) uploadFiles(Array.from(e.target.files));
+    fileInput.value = '';
+  });
+
+  // Drag handling — dropzone visual state
+  ['dragenter', 'dragover'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('active'); });
+  });
+  ['dragleave', 'drop'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('active'); });
+  });
+  dropzone.addEventListener('drop', (e) => {
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length) uploadFiles(files);
+  });
+
+  // Global drag overlay — drop anywhere on the page
+  let dragCounter = 0;
+  const overlay = $('drag-overlay');
+
+  window.addEventListener('dragenter', (e) => {
+    if (!e.dataTransfer || ![...e.dataTransfer.types].includes('Files')) return;
+    dragCounter++;
+    overlay.classList.add('show');
+  });
+  window.addEventListener('dragleave', () => {
+    dragCounter--;
+    if (dragCounter <= 0) { dragCounter = 0; overlay.classList.remove('show'); }
+  });
+  window.addEventListener('dragover', (e) => { e.preventDefault(); });
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dragCounter = 0;
+    overlay.classList.remove('show');
+    // If dropped outside the dropzone, still upload
+    if (!dropzone.contains(e.target) && e.dataTransfer?.files.length) {
+      uploadFiles(Array.from(e.dataTransfer.files));
+    }
+  });
+
+  async function uploadFiles(files) {
+    const MAX = 6 * 1024 * 1024;
+    const ALLOWED_PREFIX = 'image/';
+
+    queue.innerHTML = '';
+    queue.classList.add('show');
+
+    // Pre-filter obvious problems client-side for faster feedback
+    const valid = [];
+    for (const f of files) {
+      const item = addQueueItem(f.name, 'queued');
+      if (!f.type.startsWith(ALLOWED_PREFIX)) {
+        setQueueItem(item, 'error', `Not an image (${f.type || 'unknown'})`);
+        continue;
+      }
+      if (f.size > MAX) {
+        setQueueItem(item, 'error', `Too large (${(f.size/1024/1024).toFixed(1)} MB)`);
+        continue;
+      }
+      valid.push({ file: f, item });
+    }
+
+    // Upload in parallel — they're small
+    await Promise.all(valid.map(({ file, item }) => uploadOne(file, item)));
+
+    // After all done, refresh list from server
+    await refreshList();
+
+    // Hide completed queue after a moment
+    setTimeout(() => {
+      queue.classList.remove('show');
+      queue.innerHTML = '';
+    }, 3500);
+  }
+
+  async function uploadOne(file, item) {
+    setQueueItem(item, 'uploading', 'Uploading…');
+    const fd = new FormData();
+    fd.append('files', file);
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      if (res.status === 401) {
+        setQueueItem(item, 'error', 'Session expired');
+        sessionStorage.removeItem('altifyAssetsToken');
+        setTimeout(() => location.reload(), 1200);
+        return;
+      }
+      const data = await res.json();
+      const result = data.results?.[0];
+      if (!result || !result.success) {
+        setQueueItem(item, 'error', result?.error || 'Upload failed');
+        return;
+      }
+      setQueueItem(item, 'success', 'Uploaded');
+    } catch (err) {
+      setQueueItem(item, 'error', err.message || 'Network error');
+    }
+  }
+
+  function addQueueItem(filename, status) {
+    const div = document.createElement('div');
+    div.className = 'queue-item';
+    div.innerHTML = `
+      <div class="queue-spinner" style="display:none"></div>
+      <div class="queue-name">${escapeHtml(filename)}</div>
+      <div class="queue-status">${escapeHtml(status)}</div>
+    `;
+    queue.appendChild(div);
+    return div;
+  }
+
+  function setQueueItem(item, state, statusText) {
+    item.className = `queue-item ${state}`;
+    const spinner = item.querySelector('.queue-spinner');
+    spinner.style.display = state === 'uploading' ? 'block' : 'none';
+    item.querySelector('.queue-status').textContent = statusText;
+  }
+
+  async function refreshList() {
+    try {
+      const res = await fetch('/api/list', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      allFiles = data.files || [];
+      renderGallery();
+    } catch {}
+  }
+
+  // ── Delete flow ──────────────────────────────────────
+  window.confirmDelete = (filename) => {
+    fileToDelete = filename;
+    $('confirm-filename').textContent = filename;
+    $('confirm-modal').classList.add('show');
+  };
+
+  $('confirm-delete-btn').addEventListener('click', async () => {
+    if (!fileToDelete) return;
+    const fn = fileToDelete;
+    closeModal('confirm-modal');
+    try {
+      const res = await fetch(`/api/delete?filename=${encodeURIComponent(fn)}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error || 'Delete failed', 'error');
+        return;
+      }
+      allFiles = allFiles.filter((f) => f.filename !== fn);
+      renderGallery();
+      showToast('Deleted');
+    } catch (err) {
+      showToast(err.message || 'Delete failed', 'error');
+    }
+  });
+
+  // ── Embed modal ──────────────────────────────────────
+  window.openEmbed = (filename, url) => {
+    $('embed-title').textContent = filename;
+    $('embed-url').value = url;
+    const altText = filename.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    $('embed-html').value = `<img src="${url}" alt="${altText}" style="display:block;border:0;max-width:100%;height:auto" />`;
+    $('embed-md').value = `![${altText}](${url})`;
+    $('embed-modal').classList.add('show');
+  };
+
+  window.closeModal = (id) => $(id).classList.remove('show');
+
+  document.querySelectorAll('.modal-backdrop').forEach((m) => {
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.show').forEach((m) => m.classList.remove('show'));
+  });
+
+  // ── Copy + toast ────────────────────────────────────
+  window.copyText = async (text, msg = 'Copied') => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    showToast(msg);
+  };
+
+  let toastTimer;
+  function showToast(msg, type = 'success') {
+    const toast = $('toast');
+    $('toast-text').textContent = msg;
+    toast.classList.toggle('error', type === 'error');
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  // ── Helpers ──────────────────────────────────────────
+  function formatBytes(bytes) {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[c]);
+  }
+
+  function escapeAttr(s) { return String(s).replace(/'/g, "\\'"); }
+})();
+</script>
+
+</body>
+</html>
